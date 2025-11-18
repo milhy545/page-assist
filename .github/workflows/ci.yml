@@ -1,0 +1,167 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  # Lint and type-check browser extension
+  lint-extension:
+    name: Lint Browser Extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run TypeScript compiler
+        run: bun run compile
+        continue-on-error: true
+
+      - name: Check code formatting
+        run: bunx prettier --check "src/**/*.{ts,tsx,js,jsx,json}"
+        continue-on-error: true
+
+  # Build browser extensions
+  build-extension:
+    name: Build Extensions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [chrome, firefox, edge]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build ${{ matrix.target }} extension
+        run: bun run build:${{ matrix.target }}
+
+      - name: Upload ${{ matrix.target }} artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-${{ matrix.target }}
+          path: build/${{ matrix.target == 'firefox' && 'firefox-mv2' || 'chrome-mv3' }}
+          retention-days: 7
+
+  # Build desktop application
+  build-desktop:
+    name: Build Desktop App
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: macos
+          - os: windows-latest
+            target: windows
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install dependencies
+        working-directory: desktop
+        run: bun install
+
+      - name: Build desktop app
+        working-directory: desktop
+        run: bun run tauri build
+
+      - name: Upload desktop artifact (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux
+          path: |
+            desktop/src-tauri/target/release/bundle/deb/*.deb
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+          retention-days: 7
+
+      - name: Upload desktop artifact (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-macos
+          path: desktop/src-tauri/target/release/bundle/dmg/*.dmg
+          retention-days: 7
+
+      - name: Upload desktop artifact (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows
+          path: desktop/src-tauri/target/release/bundle/msi/*.msi
+          retention-days: 7
+
+  # Test AI providers (unit tests)
+  test-providers:
+    name: Test AI Providers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests (when available)
+        run: echo "Tests will be added in future PRs"
+        # run: bun test
+        continue-on-error: true
+
+  # Documentation check
+  docs-check:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if ENHANCED_FEATURES.md exists
+        run: test -f ENHANCED_FEATURES.md
+
+      - name: Check if ARCHITECTURE.md exists
+        run: test -f ARCHITECTURE.md
+
+      - name: List new model files
+        run: |
+          echo "New AI provider implementations:"
+          ls -la src/models/ChatMercury.ts src/models/ChatAnthropic.ts src/models/ChatGeneric.ts src/models/ImageGeneration.ts

@@ -245,3 +245,22 @@ export const pageAssistModel = async ({
     ...payload
   })
 }
+
+// Export new AI providers
+export { ChatMercury, MERCURY_MODELS } from "./ChatMercury"
+export { ChatAnthropic, CLAUDE_MODELS } from "./ChatAnthropic"
+export {
+  ChatGeneric,
+  GENERIC_PROVIDERS,
+  createProviderChat,
+} from "./ChatGeneric"
+export {
+  DALLE3,
+  StableDiffusion,
+  FluxReplicate,
+  createImageProvider,
+  IMAGE_GENERATION_MODELS,
+  type ImageGenerationParams,
+  type ImageResult,
+  type ImageGenerationProvider,
+} from "./ImageGeneration"
