@@ -58,7 +58,7 @@ pnpm build
 pnpm dashboard:dev
 ```
 
-**Dashboard URL:** `http://localhost:3000`
+**Dashboard URL:** `http://localhost:5173`
 
 ---
 
@@ -488,7 +488,7 @@ pnpm build
 pnpm dashboard:dev
 ```
 
-Then open **`http://localhost:3000`** and see your projects working together! 🎊
+Then open **`http://localhost:5173`** and see your projects working together! 🎊
 
 ---
 

@@ -446,7 +446,7 @@ pnpm build
 pnpm dashboard:dev
 ```
 
-**Dashboard:** http://localhost:3000
+**Dashboard:** http://localhost:5173
 
 ### Browser Extension
 
@@ -785,7 +785,7 @@ Built with amazing open-source technologies:
 - **Repository:** milhy545/page-assist
 - **Branch:** claude/multi-platform-ai-assistant-01SVvSvwNR3oVswkAvL5DYKC
 - **Latest Commit:** 11f9d20
-- **Dashboard:** http://localhost:3000 (after `pnpm dashboard:dev`)
+- **Dashboard:** http://localhost:5173 (after `pnpm dashboard:dev`)
 
 ### Commands Cheat Sheet
 ```bash
