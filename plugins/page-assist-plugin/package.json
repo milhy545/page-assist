@@ -21,6 +21,7 @@
     "@page-assist/event-bus": "workspace:*",
     "@page-assist/plugin-system": "workspace:*",
     "@page-assist/ui": "workspace:*",
+    "@page-assist/voice": "workspace:*",
     "lucide-react": "^0.350.0"
   },
   "devDependencies": {
